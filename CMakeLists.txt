@@ -11,24 +11,39 @@ include_directories(
 	include
 )
 
-file(
-	GLOB
+set(
 	sources
-	src/*.cpp
+	src/generator.cpp
+	src/imgui_impl_glfw.cpp
+	src/imgui_impl_opengl3.cpp
+	src/main.cpp
 )
 
-add_executable(${PROJECT_NAME} ${sources})
-target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
-target_link_libraries(
-	${PROJECT_NAME}
-	PRIVATE
-	imgui
-	# imgui_demo
-	glad
-	glfw
+set(
+	headers
+	include/abstract_image.h
+	include/compressed_image.h
+	include/generator.h
+	include/image.h
+	include/imgui_impl_glfw.h
+	include/imgui_impl_opengl3.h
+	include/mandelbrot_helper.h
 )
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+# set(CMAKE_CXX_COMPILER clang-8)
 
-install(TARGETS Buddhabrot DESTINATION bin)
+add_executable(${PROJECT_NAME} ${sources} ${headers})
+target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>")
+target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
+target_link_libraries(
+	${PROJECT_NAME}
+	PUBLIC
+	pthread
+	imgui
+	glad
+	glfw
+)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)

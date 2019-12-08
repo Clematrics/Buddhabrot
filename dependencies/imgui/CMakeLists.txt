@@ -18,10 +18,5 @@ set(IMGUI_SOURCES
 	imgui/imgui_demo.cpp
 )
 
-# set(IMGUI_DEMO_SOURCES
-# )
-
 add_library(${PROJECT_NAME} STATIC ${IMGUI_SOURCES} ${IMGUI_HEADERS})
-# add_library(${PROJECT_NAME}_demo STATIC ${IMGUI_DEMO_SOURCES} ${IMGUI_HEADERS})
-# target_link_libraries(${PROJECT_NAME}_demo ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC imgui)
