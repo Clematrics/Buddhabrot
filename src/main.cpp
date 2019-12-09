@@ -68,10 +68,18 @@ const GLchar* vertexSource = R"glsl(
 	in vec2 position;
 	in vec2 texcoord;
 	out vec2 Texcoord;
+	uniform vec2 window_size;
 	void main()
 	{
 		Texcoord = texcoord;
-		gl_Position = vec4(position, 0.0, 1.0);
+		if (window_size.x > window_size.y) {
+			float x = position.x * window_size.y / window_size.x;
+			gl_Position = vec4(x, position.y, 0.0, 1.0);
+		}
+		else {
+			float y = position.y * window_size.x / window_size.y;
+			gl_Position = vec4(position.x, y, 0.0, 1.0);
+		}
 	}
 )glsl";
 const GLchar* fragmentSource = R"glsl(
@@ -211,6 +219,10 @@ int main(int argc, char** argv) {
 		// Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
 		glfwPollEvents();
 
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+
 		// Start the Dear ImGui frame
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -220,6 +232,8 @@ int main(int argc, char** argv) {
 			ImGui::ShowDemoWindow(&show_demo_window);
 
 		displayControlwindow();
+
+		glUseProgram(shaderProgram);
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -232,6 +246,8 @@ int main(int argc, char** argv) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glUniform2f(glGetUniformLocation(shaderProgram, "window_size"), (float)display_w, (float)display_h);
 
 		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
 		// {
@@ -257,9 +273,6 @@ int main(int argc, char** argv) {
 
 		// Rendering
 		ImGui::Render();
-		int display_w, display_h;
-		glfwGetFramebufferSize(window, &display_w, &display_h);
-		glViewport(0, 0, display_w, display_h);
 		// Clear the screen to black
 		glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 		glClear(GL_COLOR_BUFFER_BIT);
