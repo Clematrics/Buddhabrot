@@ -35,7 +35,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # set(CMAKE_CXX_COMPILER clang-8)
 
 add_executable(${PROJECT_NAME} ${sources} ${headers})
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>")
+target_compile_options(${PROJECT_NAME} PUBLIC "-O2")
+# target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_link_libraries(
 	${PROJECT_NAME}

@@ -9,8 +9,8 @@
 generator::generator(uint16_t width, uint16_t height) {
 	m_status = status::Paused;
 	for (size_t i = 0; i < threads_number; i++) {
-		threads.emplace_back(std::thread([this]{ this->task(); }));
-		threads_progress.push_back(0.);
+		threads.emplace_back(std::thread([i, this]{ this->task(i); }));
+		threads_progress.push_back(0);
 	}
 
 	image_ptr = std::make_unique<image<uint64_t>>(width, height);
@@ -25,7 +25,7 @@ std::pair<const T, const T> minmax(const T a, const T b)
                    : std::pair<const T, const T>(a, b);
 }
 
-void generator::task() {
+void generator::task(size_t thread_index) {
 	using namespace std::chrono_literals;
 
 	// setup random generator
@@ -46,7 +46,7 @@ void generator::task() {
 		// doing another thread_batch
 		// acquiring size of the thread batch
 		Int points_target = 0;
-		threads_progress[0] = 0.;
+		threads_progress[thread_index] = 0;
 		{
 			std::lock_guard<std::mutex> lock(runtime_batch_points_mutex);
 			points_target = std::min(batch_points - runtime_batch_points, batch_points_per_thread);
@@ -95,7 +95,7 @@ void generator::task() {
 			}
 
 			points_number++;
-			threads_progress[0] = points_number / points_target;
+			threads_progress[thread_index] = points_number; // / points_target;
 		}
 	}
 }
