@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Buddhabrot)
 
-find_package(glfw3 REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 add_subdirectory(dependencies/imgui)
 add_subdirectory(dependencies/glad)
@@ -35,13 +35,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # set(CMAKE_CXX_COMPILER clang-8)
 
 add_executable(${PROJECT_NAME} ${sources} ${headers})
-target_compile_options(${PROJECT_NAME} PUBLIC "-O2")
+target_compile_options(${PROJECT_NAME} PUBLIC "-ggdb")
+# target_compile_options(${PROJECT_NAME} PUBLIC "-O2")
 # target_compile_options(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>")
 target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLAD)
 target_link_libraries(
 	${PROJECT_NAME}
 	PUBLIC
-	pthread
+	$<$<PLATFORM_ID:Linux>:pthread>
 	imgui
 	glad
 	glfw

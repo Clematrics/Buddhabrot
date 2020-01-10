@@ -1,12 +1,17 @@
+#include <iostream>
+#include <string>
+
+#ifdef XSYS
+#include "glad/glad_glx.h"
+#else
+#include "glad/gl.h"
+#endif
+#include "GLFW/glfw3.h"
+
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD 1
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
-#include "glad/gl.h"
-#include "GLFW/glfw3.h"
-
-#include <iostream>
-#include <string>
 
 // settings
 // --------
@@ -98,11 +103,12 @@ int main(int argc, char** argv) {
 
 	// glfw: initialize and configure
 	// ------------------------------
-	glfwInit();
+	assert(glfwInit() == GLFW_TRUE);
 	const char* glsl_version = "#version 330";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwSetErrorCallback([](int err, const char* msg){ std::cout << err << ":" << msg << std::endl; });
 
 	// glfw window creation
 	// --------------------
@@ -117,10 +123,19 @@ int main(int argc, char** argv) {
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
+	#ifdef XSYS
+	std::cout << "Use GLX" << std::endl;
+	if (!gladLoadGLXLoader((GLADloadproc)glfwGetProcAddress, nullptr, 0)) {
+		std::cout << "Failed to initialize GLAD with GLX" << std::endl;
+		return -1;
+	}
+	#else
+	std::cout << "Use GL" << std::endl;
 	if (!gladLoadGL(glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+	#endif
 
 	// Setup Dear ImGui context
 	// ------------------------

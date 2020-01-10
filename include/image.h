@@ -41,7 +41,8 @@ std::vector<pixel> image<Int>::getImage() {
 			float frac = static_cast<double>(e) / max;
 			c = - frac + 2 * sqrt(frac) * 255;
 		}
-		return (pixel){ c , c , c };
+		pixel p = { c, c, c };
+		return p;
 	});
 	return image;
 }
