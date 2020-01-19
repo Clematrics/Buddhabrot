@@ -3,17 +3,18 @@
 #include <cstdint>
 #include <vector>
 
+#include "types.h"
+
 struct pixel {
 	uint8_t r, g, b;
 };
 
-template<typename Int>
 class abstractImage {
 public:
-	virtual Int read(uint16_t, uint16_t) = 0;
-	virtual void set(uint16_t, uint16_t, Int) = 0;
-	virtual void incr(uint16_t, uint16_t) = 0;
-	virtual std::vector<pixel> getImage() = 0;
+	virtual Int read(uint16_t x, uint16_t y) = 0;
+	virtual void set(uint16_t x, uint16_t y, Int value) = 0;
+	virtual void incr(uint16_t x, uint16_t y) = 0;
+	virtual std::vector<pixel> get_image() = 0;
 
 	uint16_t width() { return m_width; }
 	uint16_t height() { return m_height; }
