@@ -18,6 +18,7 @@ struct generator_properties {
 struct generator_parameters {
 	Int iterations_to_escape     { 1000000 };
 	Real escape_norm             { 4.0 };
+	bool y_symetry               { false };
 };
 
 // Runtime parameters describe how to dispatch the computing of sequences

@@ -223,6 +223,11 @@ running_state:
 				uint16_t x = (z.real() - real_m) / (real_M - real_m) * static_cast<Real>(properties.image_width);
 				uint16_t y = (z.imag() - imag_m) / (imag_M - imag_m) * static_cast<Real>(properties.image_height);
 				image_ptr->incr(x, y);
+				if (parameters.y_symetry) {
+					uint16_t sym_y = properties.image_height - y - 1; // y is in [0, height-1], so -1 to get the result into [0,height-1] and avoid out of range
+					if (sym_y != y)		// avoid increasing twice the center line if the image has an odd height
+						image_ptr->incr(x, sym_y);
+				}
 			});
 		}
 		batch_done++;

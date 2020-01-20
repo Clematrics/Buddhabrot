@@ -152,6 +152,8 @@ void generator_panel::display_panel() {
 		ImGui::InputScalar("Escape norm (squared)", ImGuiDataType_Double, &parameters.escape_norm);
 		ImGui::InputScalar("Iterations to escape", ImGuiDataType_U64, &parameters.iterations_to_escape);
 
+		ImGui::Checkbox("Y symetry", &parameters.y_symetry);
+
 		if ((gen_ptr->get_status() == status::Stopped)
 		&& ImGui::Button("Set sequence parameters")) {
 			gen_ptr->set_parameters(parameters);
