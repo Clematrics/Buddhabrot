@@ -179,6 +179,26 @@ void generator_panel::display_panel() {
 
 		for (auto& [progress, batch_size] : gen_ptr->progress()) {
 			ImGui::Text("%lu / %lu", progress, batch_size);
+			ImGui::SameLine(150);
+			ImGui::ProgressBar((float) progress / batch_size);
+		}
+		auto [pool_progress, pool_size] = gen_ptr->pool_progress();
+		if (pool_size != 0) {
+			ImGui::Text("Pool : %lu / %lu", pool_progress, pool_size);
+			ImGui::SameLine(300);
+			ImGui::ProgressBar((float) pool_progress / pool_size);
+		}
+		else {
+			ImGui::Text("Pool : %lu", pool_progress);
+		}
+		auto [total_progress, total] = gen_ptr->total_progress();
+		if (total != 0) {
+			ImGui::Text("Total : %lu / %lu", total_progress, total);
+			ImGui::SameLine(300);
+			ImGui::ProgressBar((float) total_progress / total);
+		}
+		else {
+			ImGui::Text("Total : %lu", total_progress);
 		}
 	}
 

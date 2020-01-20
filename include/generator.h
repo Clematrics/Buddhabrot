@@ -28,6 +28,8 @@ public:
 
 	status get_status();
 	std::vector<std::pair<Int, Int>> progress();
+	std::pair<Int, Int> pool_progress();
+	std::pair<Int, Int> total_progress();
 private:
 	void task(size_t thread_index);
 	void join_all_threads_and_clear();
@@ -49,7 +51,8 @@ private:
 	std::vector<std::thread> threads;
 
 	std::mutex access_progress_mutex; // lock any access to the batch size of each thread and the total progress i.e when requesting a batch or saving progress
-	std::vector<Int> threads_progress;
+	std::vector<Int> threads_points_done;
 	std::vector<Int> threads_batch_size;
-	Int total_progress;
+	Int pool_points_done;
+	Int total_points_done;
 };

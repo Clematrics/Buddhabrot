@@ -13,7 +13,8 @@ generator::generator(std::shared_ptr<abstractImage> image_ptr_in, generator_prop
 	parameters = parameters_in;
 	runtime_parameters = runtime_parameters_in;
 
-	total_progress = 0;
+	pool_points_done = 0;
+	total_points_done = 0;
 
 	m_status = status::Stopped;
 	initiate();
@@ -28,7 +29,7 @@ void generator::join_all_threads_and_clear() {
 		thread.join();
 	}
 	threads.clear();
-	threads_progress.clear();
+	threads_points_done.clear();
 	threads_batch_size.clear();
 }
 
@@ -52,7 +53,7 @@ void generator::initiate() {
 	m_order = order::Pause;
 	m_status = status::Paused;
 	for (size_t i {0} ; i < runtime_parameters.threads_number ; i++) {
-		threads_progress.emplace_back(0);
+		threads_points_done.emplace_back(0);
 		threads_batch_size.emplace_back(0);
 		threads.emplace_back(std::thread([i, this]{ this->task(i); }));
 	}
@@ -96,19 +97,37 @@ std::vector<std::pair<Int, Int>> generator::progress() {
 	std::vector<std::pair<Int, Int>> res;
 	std::lock_guard<std::mutex> lock(access_progress_mutex);
 	for (size_t i { 0 } ; i < runtime_parameters.threads_number ; i++) {
-		res.emplace_back(threads_progress[i], threads_batch_size[i]);
+		res.emplace_back(threads_points_done[i], threads_batch_size[i]);
 	}
 	return res;
 }
 
+std::pair<Int, Int> generator::pool_progress() {
+	Int ongoing { std::accumulate(threads_points_done.begin(), threads_points_done.end(), (Int)0) };
+	return std::make_pair(pool_points_done + ongoing, runtime_parameters.pool_batch_size);
+}
+
+std::pair<Int, Int> generator::total_progress() {
+	Int ongoing { std::accumulate(threads_points_done.begin(), threads_points_done.end(), (Int)0) };
+	return std::make_pair(total_points_done + ongoing, runtime_parameters.points_target);
+}
+
 Int generator::request_batch(size_t thread_index) {
 	std::lock_guard<std::mutex> lock(access_progress_mutex);
-	Int done_or_ongoing { total_progress + std::accumulate(threads_batch_size.begin(), threads_batch_size.end(), 0) };
-	Int remaining { runtime_parameters.points_target - done_or_ongoing }; // should be always greater or equal than 0
-	Int batch_target { remaining };
+	Int ongoing { std::accumulate(threads_batch_size.begin(), threads_batch_size.end(), (Int)0) };
+	Int batch_target { runtime_parameters.thread_batch_size };
 
-	if (runtime_parameters.thread_batch_size <= remaining)
-		batch_target = runtime_parameters.thread_batch_size;
+	if (runtime_parameters.pool_batch_size != 0) { // points_target == 0 means that there is no limit of points for the pool
+		Int remaining_in_pool { runtime_parameters.pool_batch_size - pool_points_done - ongoing }; // should be always greater or equal than 0
+		if (batch_target > remaining_in_pool)
+			batch_target = remaining_in_pool;
+	}
+
+	if (runtime_parameters.points_target != 0) { // points_target == 0 means that there is no limit of points in total
+		Int remaining_in_total { runtime_parameters.points_target - total_points_done - ongoing }; // should be always greater or equal than 0
+		if (batch_target > remaining_in_total)
+			batch_target = remaining_in_total;
+	}
 
 	threads_batch_size[thread_index] = batch_target;
 	return batch_target;
@@ -119,12 +138,15 @@ void generator::save_progress(size_t thread_index, Int& batch_done, Int& batch_t
 		return;
 
 	std::lock_guard<std::mutex> lock(access_progress_mutex);
-	total_progress += batch_done;
+	pool_points_done += batch_done;
+	total_points_done += batch_done;
+	if (pool_points_done == runtime_parameters.pool_batch_size) // reset the pool progression when the goal was reached
+		pool_points_done = 0;
 
 	batch_done = 0;
 	batch_target = 0;
 
-	threads_progress[thread_index] = 0;
+	threads_points_done[thread_index] = 0;
 	threads_batch_size[thread_index] = 0;
 }
 
@@ -204,7 +226,7 @@ running_state:
 			});
 		}
 		batch_done++;
-		threads_progress[thread_index] = batch_done;
+		threads_points_done[thread_index] = batch_done;
 	}
 	// batch finished, save points processed, reset progress and request new batch
 	save_progress(thread_index, batch_done, batch_target);
