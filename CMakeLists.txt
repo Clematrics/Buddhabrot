@@ -20,6 +20,9 @@ set(
 	src/imgui_impl_glfw.cpp
 	src/imgui_impl_opengl3.cpp
 	src/main.cpp
+	src/monte_carlo_sampler.cpp
+	src/monte_carlo_tree.cpp
+	src/uniform_sampler.cpp
 )
 
 set(
@@ -35,7 +38,11 @@ set(
 	include/imgui_impl_glfw.h
 	include/imgui_impl_opengl3.h
 	include/mandelbrot_helper.h
+	include/monte_carlo_sampler.h
+	include/monte_carlo_tree.h
+	include/sampler.h
 	include/types.h
+	include/uniform_sampler.h
 )
 
 set(CMAKE_CXX_STANDARD 17)

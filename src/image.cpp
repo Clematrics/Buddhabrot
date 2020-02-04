@@ -15,12 +15,9 @@ std::vector<pixel> image::get_image() {
 	std::transform(data.begin(), data.end(), image.begin(), [&](Int e){
 		// uint8_t c = max ? e * 255 / max : 0;
 		uint8_t c = 0;
-		if (e > 5000) {
-			int i = 3;
-		}
 		if (max) {
 			float frac = static_cast<double>(e) / max;
-			c = - frac + 2 * std::sqrt(frac) * 255;
+			c = (- frac + 2 * std::sqrt(frac)) * 255;
 		}
 		// uint8_t c = 200;
 		pixel p = { c, c, c };

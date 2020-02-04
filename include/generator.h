@@ -50,6 +50,7 @@ private:
 	order m_order;
 	std::vector<std::thread> threads;
 
+	std::mutex sample_mutex; // lock any access to the sampler
 	std::mutex access_progress_mutex; // lock any access to the batch size of each thread and the total progress i.e when requesting a batch or saving progress
 	std::vector<Int> threads_points_done;
 	std::vector<Int> threads_batch_size;

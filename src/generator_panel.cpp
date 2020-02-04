@@ -134,10 +134,25 @@ void generator_panel::display_panel() {
 		ImGui::InputScalar("Corner A (imag)", ImGuiDataType_Double, &a_imag);
 		ImGui::InputScalar("Corner B (real)", ImGuiDataType_Double, &b_real);
 		ImGui::InputScalar("Corner B (imag)", ImGuiDataType_Double, &b_imag);
-		properties.corner_a.real(a_real);
-		properties.corner_a.imag(a_imag);
-		properties.corner_b.real(b_real);
-		properties.corner_b.imag(b_imag);
+		// ensure that the real parts are different (same for imaginary parts), and add one if not
+		if (a_real == b_real) b_real += 1;
+		if (a_imag == b_imag) b_imag += 1;
+		// ensure that corner_a is the bottom left corner, and corner_b is the top one
+		properties.corner_a.real(std::min(a_real, b_real));
+		properties.corner_a.imag(std::min(a_imag, b_imag));
+		properties.corner_b.real(std::max(a_real, b_real));
+		properties.corner_b.imag(std::max(a_imag, b_imag));
+
+		static bool use_monte_carlo_sampler = properties.sampler_t == sampler_type::MonteCarlo;
+		ImGui::Checkbox("Use Monte Carlo sampler", &use_monte_carlo_sampler);
+		if (use_monte_carlo_sampler) {
+			properties.sampler_t = sampler_type::MonteCarlo;
+			ImGui::InputScalar("Number of layers", ImGuiDataType_U64, &properties.layers);
+			ImGui::InputScalar("Layers' resolution", ImGuiDataType_U64, &properties.layer_resolution);
+		}
+		else {
+			properties.sampler_t = sampler_type::Uniform;
+		}
 
 		if ((gen_ptr->get_status() == status::Stopped)
 		&& ImGui::Button("New generator")) {

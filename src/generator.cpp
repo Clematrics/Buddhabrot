@@ -6,6 +6,7 @@
 #include "helper.h"
 #include "image.h"
 #include "mandelbrot_helper.h"
+#include "monte_carlo_sampler.h"
 
 generator::generator(std::shared_ptr<abstractImage> image_ptr_in, generator_properties& properties_in, generator_parameters& parameters_in, generator_runtime_parameters& runtime_parameters_in) {
 	image_ptr = image_ptr_in;
@@ -153,13 +154,15 @@ void generator::save_progress(size_t thread_index, Int& batch_done, Int& batch_t
 void generator::task(size_t thread_index) {
 	using namespace std::chrono_literals;
 
-	// setup random generator
-	std::random_device rd;
-	std::ranlux48 engine(rd());
-	auto [real_m, real_M] = minmax(properties.corner_a.real(), properties.corner_b.real());
-	auto [imag_m, imag_M] = minmax(properties.corner_a.imag(), properties.corner_b.imag());
-	std::uniform_real_distribution<Real> real_distrib(real_m, real_M);
-	std::uniform_real_distribution<Real> imag_distrib(imag_m, imag_M);
+	monte_carlo_sampler sampler(properties.corner_a, properties.corner_b, properties.layers, properties.layer_resolution);
+
+	// // setup random generator
+	// std::random_device rd;
+	// std::ranlux48 engine(rd());
+	// auto [real_m, real_M] = minmax(properties.corner_a.real(), properties.corner_b.real());
+	// auto [imag_m, imag_M] = minmax(properties.corner_a.imag(), properties.corner_b.imag());
+	// std::uniform_real_distribution<Real> real_distrib(real_m, real_M);
+	// std::uniform_real_distribution<Real> imag_distrib(imag_m, imag_M);
 
 	bool must_request_batch { true };
 	Int batch_target { 0 };
@@ -195,9 +198,16 @@ running_state:
 			goto stopped_state;
 
 		// process one point
-		std::complex<Real> z0(real_distrib(engine), imag_distrib(engine));
-		if (insideCardioids(z0))
+		sample_result sample;
+		{
+			std::lock_guard<std::mutex> lock(sample_mutex);
+			sample = sampler.sample();
+		}
+		std::complex<Real> z0 = sample.sample;
+		if (insideCardioids(z0)) {
+			sample.feedback_result(0, parameters.iterations_to_escape);
 			continue;
+		}
 
 		seq.clear();
 		Int i = 0;
@@ -208,11 +218,26 @@ running_state:
 		}
 
 		// the sequence didn't escaped before the limit : it is not taken into account
-		if (i == parameters.iterations_to_escape)
+		if (i == parameters.iterations_to_escape) {
+			sample.feedback_result(0, parameters.iterations_to_escape);
 			continue;
+		}
+		if (i == 0 && std::norm(z) >= parameters.escape_norm) {
+			// if the sample z0 is out of the norm at the first iteration, penalize the monte carlo tree
+			sample.feedback_result(0, parameters.iterations_to_escape);
+			continue;
+		}
 
-		// apply the sequence to the image
+		// apply the sequence to the image and feedback the result to the sampler
 		{
+			Int successful_points = 0;
+
+			// To avoid calling it each time in the lambda
+			Real real_m = properties.corner_a.real();
+			Real real_M = properties.corner_b.real();
+			Real imag_m = properties.corner_a.imag();
+			Real imag_M = properties.corner_b.imag();
+
 			std::lock_guard<std::mutex> lock(image_ptr_mutex);
 			std::for_each(seq.begin(), seq.end(), [&](auto z){
 				if (z.real() < real_m
@@ -220,19 +245,26 @@ running_state:
 				||	z.imag() < imag_m
 				||	imag_M < z.imag())
 					return;
+
 				uint16_t x = (z.real() - real_m) / (real_M - real_m) * static_cast<Real>(properties.image_width);
 				uint16_t y = (z.imag() - imag_m) / (imag_M - imag_m) * static_cast<Real>(properties.image_height);
+
 				image_ptr->incr(x, y);
+				successful_points++;
+
 				if (parameters.y_symetry) {
 					uint16_t sym_y = properties.image_height - y - 1; // y is in [0, height-1], so -1 to get the result into [0,height-1] and avoid out of range
 					if (sym_y != y)		// avoid increasing twice the center line if the image has an odd height
 						image_ptr->incr(x, sym_y);
 				}
 			});
+
+			sample.feedback_result(successful_points, parameters.iterations_to_escape);
 		}
 		batch_done++;
 		threads_points_done[thread_index] = batch_done;
 	}
+
 	// batch finished, save points processed, reset progress and request new batch
 	save_progress(thread_index, batch_done, batch_target);
 	if (m_order == order::FinishBatch)
