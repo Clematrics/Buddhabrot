@@ -29,6 +29,7 @@ struct generator_properties {
 // Parameters control the behavior of sequences and can be changed
 struct generator_parameters {
 	Int iterations_to_escape     { 1000000 };
+	Int minimum_iterations       { 100000  };
 	Real escape_norm             { 4.0 };
 	bool y_symetry               { false };
 };

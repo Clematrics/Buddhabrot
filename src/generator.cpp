@@ -218,7 +218,7 @@ running_state:
 		}
 
 		// the sequence didn't escaped before the limit : it is not taken into account
-		if (i == parameters.iterations_to_escape) {
+		if (i == parameters.iterations_to_escape || i < parameters.minimum_iterations) {
 			sample.feedback_result(0, parameters.iterations_to_escape);
 			continue;
 		}
