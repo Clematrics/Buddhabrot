@@ -1,12 +1,12 @@
-#include "generator.h"
+#include "generator/generator.h"
 
 #include <algorithm>
 #include <random>
 
 #include "helper.h"
-#include "image.h"
+#include "image/image.h"
 #include "mandelbrot_helper.h"
-#include "monte_carlo_sampler.h"
+#include "sampler/monte_carlo_sampler.h"
 
 generator::generator(std::shared_ptr<abstractImage> image_ptr_in, generator_properties& properties_in, generator_parameters& parameters_in, generator_runtime_parameters& runtime_parameters_in) {
 	image_ptr = image_ptr_in;

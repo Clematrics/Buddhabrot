@@ -1,4 +1,4 @@
-#include "monte_carlo_tree.h"
+#include "sampler/monte_carlo_tree.h"
 
 #include <algorithm>
 #include <cmath>

@@ -13,36 +13,46 @@ include_directories(
 
 set(
 	sources
-	src/generator_info.cpp
-	src/generator_panel.cpp
-	src/generator.cpp
-	src/image.cpp
-	src/imgui_impl_glfw.cpp
-	src/imgui_impl_opengl3.cpp
+	src/generator/generator_info.cpp
+	src/generator/generator.cpp
+
+	src/gui/generator_panel.cpp
+
+	src/image/image.cpp
+
+	src/imgui/imgui_impl_glfw.cpp
+	src/imgui/imgui_impl_opengl3.cpp
+
+	src/sampler/monte_carlo_sampler.cpp
+	src/sampler/monte_carlo_tree.cpp
+	src/sampler/uniform_sampler.cpp
+
 	src/main.cpp
-	src/monte_carlo_sampler.cpp
-	src/monte_carlo_tree.cpp
-	src/uniform_sampler.cpp
 )
 
 set(
 	headers
-	include/abstract_image.h
-	include/compressed_image.h
-	include/generator_info.h
-	include/generator_panel.h
-	include/generator.h
+	include/generator/generator_info.h
+	include/generator/generator.h
+
+	include/gui/generator_panel.h
+
+	include/image/abstract_image.h
+	include/image/compressed_image.h
+	include/image/image_converter.h
+	include/image/image.h
+
+	include/imgui/imgui_impl_glfw.h
+	include/imgui/imgui_impl_opengl3.h
+
+	include/sampler/monte_carlo_sampler.h
+	include/sampler/monte_carlo_tree.h
+	include/sampler/sampler.h
+	include/sampler/uniform_sampler.h
+
 	include/helper.h
-	include/image.h
-	include/image_converter.h
-	include/imgui_impl_glfw.h
-	include/imgui_impl_opengl3.h
 	include/mandelbrot_helper.h
-	include/monte_carlo_sampler.h
-	include/monte_carlo_tree.h
-	include/sampler.h
 	include/types.h
-	include/uniform_sampler.h
 )
 
 set(CMAKE_CXX_STANDARD 17)

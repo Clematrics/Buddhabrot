@@ -1,4 +1,4 @@
-#include "uniform_sampler.h"
+#include "sampler/uniform_sampler.h"
 
 #include "helper.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sampler.h"
+#include "sampler/sampler.h"
 
 #include <random>
 

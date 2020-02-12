@@ -1,7 +1,7 @@
-#include "generator_panel.h"
+#include "gui/generator_panel.h"
 
-#include "generator_info.h"
-#include "image.h"
+#include "generator/generator_info.h"
+#include "image/image.h"
 
 #include "glad/glad.h"
 #include "imgui.h"

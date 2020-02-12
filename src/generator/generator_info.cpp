@@ -1,4 +1,4 @@
-#include "generator_info.h"
+#include "generator/generator_info.h"
 
 std::string_view status_to_string(status s) {
 	switch (s) {

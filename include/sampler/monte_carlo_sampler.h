@@ -1,10 +1,10 @@
 #pragma once
-#include "sampler.h"
+#include "sampler/sampler.h"
 
 #include <random>
 #include <queue>
 
-#include "monte_carlo_tree.h"
+#include "sampler/monte_carlo_tree.h"
 #include "types.h"
 
 class monte_carlo_sampler : public sampler {

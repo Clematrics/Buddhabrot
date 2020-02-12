@@ -1,4 +1,4 @@
-#include "monte_carlo_sampler.h"
+#include "sampler/monte_carlo_sampler.h"
 
 #include "helper.h"
 

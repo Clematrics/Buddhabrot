@@ -7,8 +7,8 @@
 #include <mutex>
 #include <vector>
 
-#include "abstract_image.h"
-#include "generator_info.h"
+#include "image/abstract_image.h"
+#include "generator/generator_info.h"
 #include "types.h"
 
 using namespace std::complex_literals;

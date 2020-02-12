@@ -1,18 +1,23 @@
 #pragma once
 
+#include "image/abstract_image.h"
+
 #include <cstdint>
 #include <vector>
 
-#include "abstract_image.h"
 #include "types.h"
 
-class compressedImage : public abstractImage {
+class image : public abstractImage {
 public:
-	compressedImage(uint16_t, uint16_t);
+	image(uint16_t, uint16_t);
 	Int read(uint16_t, uint16_t);
 	void set(uint16_t, uint16_t, Int);
 	void incr(uint16_t, uint16_t);
+	std::vector<pixel> get_image();
 private:
+	Int& at(uint16_t, uint16_t);
+
+	bool changed;
 	Int max;
-	std::vector<std::vector<Int>> data;
+	std::vector<Int> data;
 };

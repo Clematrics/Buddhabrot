@@ -1,8 +1,8 @@
 #pragma once
 
-#include "generator.h"
-#include "generator_info.h"
-#include "abstract_image.h"
+#include "generator/generator.h"
+#include "generator/generator_info.h"
+#include "image/abstract_image.h"
 #include "types.h"
 
 #include "glad/glad.h"
