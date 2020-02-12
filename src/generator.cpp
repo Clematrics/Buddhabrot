@@ -212,8 +212,8 @@ running_state:
 		seq.clear();
 		Int i = 0;
 		std::complex<Real> z = z0;
+
 		for ( ; i < parameters.iterations_to_escape && std::norm(z) < parameters.escape_norm ; i++) {
-			seq.push_back(z);
 			z = z * z + z0;
 		}
 
@@ -222,6 +222,13 @@ running_state:
 			sample.feedback_result(0, parameters.iterations_to_escape);
 			continue;
 		}
+
+		z = z0;
+		for (i = 0 ; i < parameters.iterations_to_escape && std::norm(z) < parameters.escape_norm ; i++) {
+			seq.push_back(z);
+			z = z * z + z0;
+		}
+
 		if (i == 0 && std::norm(z) >= parameters.escape_norm) {
 			// if the sample z0 is out of the norm at the first iteration, penalize the monte carlo tree
 			sample.feedback_result(0, parameters.iterations_to_escape);
